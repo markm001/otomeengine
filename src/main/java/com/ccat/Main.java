@@ -1,26 +1,13 @@
 package com.ccat;
 
-import com.ccat.core.Window;
+import com.ccat.core.WindowManager;
 import org.lwjgl.Version;
-
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
-import static org.lwjgl.glfw.GLFW.glfwTerminate;
-
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Version.getVersion());
+        System.out.println("LWJGL Version " + Version.getVersion() + " is working.");
 
-        Window window = new Window();
-        window.init();
-
-        while(!window.windowShouldClose()) {
-            window.update();
-            double time = glfwGetTime();
-        }
-
-        window.clean();
-        glfwTerminate();
-        window.getErrorCallback().free();
+        WindowManager window = WindowManager.getInstance();
+        window.create();
     }
 }
