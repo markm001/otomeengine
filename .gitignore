@@ -4,7 +4,11 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### CCat ###
+/src/main/java/testing/**
+
 ### IntelliJ IDEA ###
+.idea
 .idea/modules.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
