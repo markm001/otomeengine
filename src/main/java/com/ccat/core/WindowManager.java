@@ -8,15 +8,11 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public final class WindowManager {
@@ -53,10 +49,12 @@ public final class WindowManager {
 
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
 
         window = glfwCreateWindow(
                 width, height, TITLE,
@@ -262,7 +260,7 @@ public final class WindowManager {
     private void drawChallenge3() {
         glBindVertexArray(vao3);
         glDrawElements(GL_TRIANGLES,
-                ShapeUtil.getStarVertexArray().length,
+                ShapeUtil.getStarElementArray().length,
                 GL_UNSIGNED_INT,
                 0
                 );
@@ -330,12 +328,80 @@ public final class WindowManager {
         glBindVertexArray(0);
     }
 
+    /**
+     * Challenge 5
+     */
+    private int vao5;
+    private int vbo5;
+    private int ebo5;
+    private void initChallenge5() {
+        float[] vertexArray = ShapeUtil.getStarVertexArray();
+        int[] elementArray = ShapeUtil.getStarElementArray();
+
+        int positionSize = 3;
+        int colorSize = 4;
+        int vertexSize = (positionSize + colorSize) * floatSize;
+        int vertexBindingPoint = 0;
+
+        this.vao5 = glCreateVertexArrays();
+        glBindVertexArray(vao5);
+
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer vertexBuffer = stack.mallocFloat(vertexArray.length)
+                    .put(vertexArray)
+                    .flip();
+
+            this.vbo5 = glCreateBuffers();
+            glNamedBufferData(vbo5, vertexBuffer, GL_STATIC_DRAW);
+            glVertexArrayVertexBuffer(vao5, vertexBindingPoint, vbo5, 0, vertexSize);
+
+
+            IntBuffer elementBuffer = stack.mallocInt(elementArray.length)
+                    .put(elementArray)
+                    .flip();
+
+            this.ebo5 = glCreateBuffers();
+            glNamedBufferData(ebo5, elementBuffer, GL_STATIC_DRAW);
+            glVertexArrayElementBuffer(vao5, ebo5);
+        }
+
+        int colorAttribSlot = 0;
+        glVertexArrayAttribFormat(vao5, colorAttribSlot, colorSize, GL_FLOAT,false, colorSize * floatSize);
+        glVertexArrayAttribBinding(vao5, colorAttribSlot, vertexBindingPoint);
+        glEnableVertexArrayAttrib(vao5, colorAttribSlot);
+
+        int positionAttribSlot = 1;
+        glVertexArrayAttribFormat(vao5, positionAttribSlot, positionSize, GL_FLOAT,false, positionSize * floatSize);
+        glVertexArrayAttribBinding(vao5, positionAttribSlot, vertexBindingPoint);
+        glEnableVertexArrayAttrib(vao5, positionAttribSlot);
+    }
+
+    private void drawChallenge5() {
+        glBindVertexArray(vao5);
+        glDrawElements(GL_TRIANGLES,
+                ShapeUtil.getStarElementArray().length,
+                GL_UNSIGNED_INT,
+                0
+        );
+    }
+
+    private void disposeChallenge5() {
+        glDeleteVertexArrays(vao5);
+        glDeleteBuffers(vbo5);
+        glDeleteBuffers(ebo5);
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glBindVertexArray(0);
+    }
+
     private void disposeCurrentChallenge() {
         switch (challengeIndex) {
             case 1 -> disposeChallenge1();
             case 2 -> disposeChallenge2();
             case 3 -> disposeChallenge3();
             case 4 -> disposeChallenge4();
+            case 5 -> disposeChallenge5();
         }
     }
 
@@ -345,6 +411,7 @@ public final class WindowManager {
             case 2 -> drawChallenge2();
             case 3 -> drawChallenge3();
             case 4 -> drawChallenge4();
+            case 5 -> drawChallenge5();
             default -> {}
         }
     }
@@ -369,8 +436,25 @@ public final class WindowManager {
         } else if(KeyListener.isKeyPressed(GLFW_KEY_5)) {
             disposeCurrentChallenge();
             challengeIndex = 5;
+            initChallenge5();
+        } else if(KeyListener.isKeyPressed(GLFW_KEY_0)) {
+            disposeCurrentChallenge();
+            challengeIndex = -1;
+        }
+
+        if(KeyListener.isKeyPressed(GLFW_KEY_F1) && debounce) {
+            debounce = false;
+
+            new Thread(() -> {
+                try {
+                    Thread.sleep(400);
+                    debounce = true;
+                } catch (InterruptedException ignore) { }
+            });
+            toggleFullScreen();
         }
     }
+    private volatile boolean debounce = true;
 
     private void dispose() {
         shader.unbind();
