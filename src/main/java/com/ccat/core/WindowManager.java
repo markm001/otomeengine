@@ -58,7 +58,8 @@ public final class WindowManager {
 
         window = glfwCreateWindow(
                 width, height, TITLE,
-                glfwGetPrimaryMonitor(),
+//                glfwGetPrimaryMonitor(),
+                NULL,
                 NULL);
         if(window == NULL) {
             glfwTerminate();
@@ -366,12 +367,12 @@ public final class WindowManager {
         }
 
         int colorAttribSlot = 0;
-        glVertexArrayAttribFormat(vao5, colorAttribSlot, colorSize, GL_FLOAT,false, colorSize * floatSize);
+        glVertexArrayAttribFormat(vao5, colorAttribSlot, colorSize, GL_FLOAT,false,0);
         glVertexArrayAttribBinding(vao5, colorAttribSlot, vertexBindingPoint);
         glEnableVertexArrayAttrib(vao5, colorAttribSlot);
 
         int positionAttribSlot = 1;
-        glVertexArrayAttribFormat(vao5, positionAttribSlot, positionSize, GL_FLOAT,false, positionSize * floatSize);
+        glVertexArrayAttribFormat(vao5, positionAttribSlot, positionSize, GL_FLOAT,false,colorSize * floatSize);
         glVertexArrayAttribBinding(vao5, positionAttribSlot, vertexBindingPoint);
         glEnableVertexArrayAttrib(vao5, positionAttribSlot);
     }

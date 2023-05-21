@@ -1,10 +1,11 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'java'
 }
 
 project.ext.lwjglVersion = "3.3.2"
 project.ext.jomlVersion = "1.10.5"
-project.ext.lwjglNatives = "natives-linux"
+project.ext.lwjglNatives = "natives-windows"
 
 group = 'com.ccat'
 version = '1.0-SNAPSHOT'
@@ -38,4 +39,10 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-par::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
+}
+
+shadowJar {
+    manifest {
+        attributes 'Main-Class': 'com.ccat.Main'
+    }
 }
