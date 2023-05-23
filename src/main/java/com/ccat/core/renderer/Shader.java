@@ -1,7 +1,6 @@
 package com.ccat.core.renderer;
 
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Shader {
     private final String vertexShaderSource = """
@@ -64,6 +63,8 @@ public class Shader {
             throw new RuntimeException(glGetProgramInfoLog(programId));
         }
 
+        glDetachShader(programId, vertexShader);
+        glDetachShader(programId, fragmentShader);
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
     }
