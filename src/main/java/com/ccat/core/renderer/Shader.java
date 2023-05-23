@@ -1,83 +1,57 @@
 package com.ccat.core.renderer;
 
+import com.ccat.core.model.ShaderType;
+import com.ccat.core.util.FileReaderUtil;
+
+import java.io.IOException;
+
+import static org.lwjgl.opengl.GL11.GL_FALSE;
 import static org.lwjgl.opengl.GL20.*;
 
 public class Shader {
-    private final String vertexShaderSource = """
-            #version 460 core
+    private final int shaderId;
 
-            layout(location = 0) in vec4 aColor;
-            layout(location = 1) in vec3 aPosition;
+    public Shader(ShaderType type, String filepath) {
+        this.shaderId = compile(type, filepath);
+    }
 
-            out vec4 fColor;
+    /**
+     * Compiles the Shader from Type and filepath provided
+     *
+     * @param type Type of Shader to compile
+     * @param filepath Filepath to the Shader file
+     * @return Id of the Shader-Object
+     */
+    private int compile(ShaderType type, String filepath) {
+        try {
+            String shaderSource = FileReaderUtil.readFile(filepath);
 
-            void main() {
-                fColor = aColor;
-                gl_Position = vec4(aPosition, 1.0);
-            }""";
-
-    private final String fragmentShaderSource = """
-            #version 460 core
-
-            in vec4 fColor;
-
-            out vec4 FragColor;
-
-            void main() {
-                FragColor = fColor;
-            }""";
-
-    private int programId;
-
-    public void compile() {
-        // -- Vertex Shader --
-        int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-        glShaderSource(vertexShader, vertexShaderSource);
-        glCompileShader(vertexShader);
+            int shaderId = glCreateShader(type.getGlType());
+            glShaderSource(shaderId, shaderSource);
+            glCompileShader(shaderId);
 
             //Check Errors:
-        if(glGetShaderi(vertexShader, GL_COMPILE_STATUS) == GL_FALSE) {
-            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
+            if(glGetShaderi(shaderId, GL_COMPILE_STATUS) == GL_FALSE) {
+                String infoLog = glGetShaderInfoLog(shaderId);
+                glDeleteShader(shaderId);
+
+                throw new RuntimeException(infoLog);
+            }
+
+            return shaderId;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read Shader File-Path: " + filepath);
         }
-
-
-        // -- Fragment Shader --
-        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, fragmentShaderSource);
-        glCompileShader(fragmentShader);
-
-            //Check Error:
-        if(glGetShaderi(fragmentShader, GL_COMPILE_STATUS) == GL_FALSE) {
-            throw new RuntimeException(glGetShaderInfoLog(fragmentShader));
-        }
-
-        // -- Link Shaders --
-        this.programId = glCreateProgram();
-        glAttachShader(programId, vertexShader);
-        glAttachShader(programId, fragmentShader);
-        glLinkProgram(programId);
-
-            //Check Error:
-        if(glGetProgrami(programId, GL_LINK_STATUS) == GL_FALSE) {
-            throw new RuntimeException(glGetProgramInfoLog(programId));
-        }
-
-        glDetachShader(programId, vertexShader);
-        glDetachShader(programId, fragmentShader);
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
     }
 
-    public void bind() {
-        glUseProgram(programId);
+    /** @return Id of the Shader */
+    public int getShaderId() {
+        return shaderId;
     }
 
-    public void unbind() {
-        glUseProgram(0);
-    }
-
-    public int getProgramId() {
-        return programId;
+    /** Deletes the Shader Object */
+    public void destroy() {
+        glDeleteShader(shaderId);
     }
 }

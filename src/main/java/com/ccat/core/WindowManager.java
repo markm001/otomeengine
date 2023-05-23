@@ -2,7 +2,7 @@ package com.ccat.core;
 
 import com.ccat.core.listener.KeyListener;
 import com.ccat.core.listener.MouseListener;
-import com.ccat.core.renderer.Shader;
+import com.ccat.core.renderer.ShaderProgram;
 import com.ccat.core.util.ShapeUtil;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -22,8 +22,8 @@ public final class WindowManager {
     private final int height = 1080;
     private long window;
     private GLFWErrorCallback errorCallback;
+    private ShaderProgram shaderProgram;
 
-    private Shader shader;
     private final int floatSize = Float.BYTES;
     private int challengeIndex = -1;
 
@@ -78,9 +78,11 @@ public final class WindowManager {
     }
 
     private void loop() {
-        this.shader = new Shader();
-        shader.compile();
-        shader.bind();
+        final String vertexShaderFilepath = "shaders/vertex/vertex_shader_default.glsl";
+        final String fragmentShaderFilepath = "shaders/fragment/fragment_shader_default.glsl";
+
+        this.shaderProgram = new ShaderProgram(vertexShaderFilepath, fragmentShaderFilepath);
+        shaderProgram.bind();
 
         while(!glfwWindowShouldClose(window)) {
             glClearColor(0.3f, 0.4f, 0.5f, 1);
@@ -126,7 +128,7 @@ public final class WindowManager {
         int vertexSizeBytes = (colorSize + positionSize) * floatSize;
 
 
-        int colAttrib = glGetAttribLocation(shader.getProgramId(), "aColor");
+        int colAttrib = glGetAttribLocation(shaderProgram.getProgram(), "aColor");
         glEnableVertexAttribArray(colAttrib);
         glVertexAttribPointer(
                 0,
@@ -137,7 +139,7 @@ public final class WindowManager {
                 0
         );
 
-        int posAttrib = glGetAttribLocation(shader.getProgramId(), "aPosition");
+        int posAttrib = glGetAttribLocation(shaderProgram.getProgram(), "aPosition");
         glEnableVertexAttribArray(posAttrib);
         glVertexAttribPointer(
                 1,
@@ -458,7 +460,8 @@ public final class WindowManager {
     private volatile boolean debounce = true;
 
     private void dispose() {
-        shader.unbind();
+        shaderProgram.unbind();
+        shaderProgram.destroy();
 
         glfwDestroyWindow(window);
         glfwTerminate();
