@@ -1,8 +1,11 @@
 package com.ccat.core.renderer;
 
 import com.ccat.core.model.ShaderType;
+import org.joml.*;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +26,16 @@ public class ShaderProgram {
     public ShaderProgram(String vertexShaderFilepath, String fragmentShaderFilepath) {
         Shader vertexShader = new Shader(ShaderType.VERTEX, vertexShaderFilepath);
         Shader fragmentShader = new Shader(ShaderType.FRAGMENT, fragmentShaderFilepath);
+
+        linkShaders(vertexShader, fragmentShader);
+    }
+
+    public ShaderProgram() {
+        final String defaultVertexFilepath = "shaders/vertex/vertex_shader_default.glsl";
+        final String defaultFragmentFilepath = "shaders/fragment/fragment_shader_default.glsl";
+
+        Shader vertexShader = new Shader(ShaderType.VERTEX, defaultVertexFilepath);
+        Shader fragmentShader = new Shader(ShaderType.FRAGMENT, defaultFragmentFilepath);
 
         linkShaders(vertexShader, fragmentShader);
     }
@@ -60,13 +73,13 @@ public class ShaderProgram {
         vertexShader.destroy();
         fragmentShader.destroy();
 
-        getUniformLocations();
+        compileUniformLocations();
     }
 
     /**
      * Creates a Map of Shader Program Uniforms and their layout locations
      */
-    private void getUniformLocations() {
+    private void compileUniformLocations() {
         int uniformNum = glGetProgrami(program, GL_ACTIVE_UNIFORMS);
         int maxLength = glGetProgrami(program, GL_ACTIVE_UNIFORM_MAX_LENGTH);
 
@@ -105,6 +118,7 @@ public class ShaderProgram {
 
     /** Deletes the Shader Program and sets the Program-Id to -1 */
     public void destroy() {
+        uniformLocations.clear();
         glDeleteProgram(0);
         program = -1;
     }
@@ -112,5 +126,79 @@ public class ShaderProgram {
     /** @return Shader Program-Id */
     public int getProgram() {
         return program;
+    }
+
+    /**
+     * Uploads a Vector4 Uniform to the Shader Object
+     *
+     * @param var Uniform name
+     * @param vec4 Value to upload
+     */
+    public void uploadVec4(String var, Vector4f vec4) {
+        Integer location = uniformLocations.get(var);
+        glUniform4f(location, vec4.x, vec4.y, vec4.z, vec4.w);
+    }
+
+    public void uploadVec3(String var, Vector3f vec3) {
+        Integer location = uniformLocations.get(var);
+        glUniform3f(location, vec3.x, vec3.y, vec3.z);
+    }
+
+    public void uploadVec2(String var, Vector2f vec2) {
+        Integer location = uniformLocations.get(var);
+        glUniform2f(location, vec2.x, vec2.y);
+    }
+
+    public void uploadIVec4(String var, Vector4i vec4) {
+        Integer location = uniformLocations.get(var);
+        glUniform4i(location, vec4.x, vec4.y, vec4.z, vec4.w);
+    }
+
+    public void uploadIVec3(String var, Vector3i vec3) {
+        Integer location = uniformLocations.get(var);
+        glUniform3i(location, vec3.x, vec3.y, vec3.z);
+    }
+
+    public void uploadIVec2(String var, Vector2i vec2) {
+        Integer location = uniformLocations.get(var);
+        glUniform2i(location, vec2.x, vec2.y);
+    }
+
+    public void uploadFloat(String var, float val) {
+        Integer location = uniformLocations.get(var);
+        glUniform1f(location, val);
+    }
+
+    public void uploadInt(String var, Integer val) {
+        Integer location = uniformLocations.get(var);
+        glUniform1i(location, val);
+    }
+
+    public void uploadIntArray(String var, int[] array) {
+        Integer location = uniformLocations.get(var);
+        glUniform1iv(location, array);
+    }
+
+    public void uploadBool(String var, boolean val ) {
+        Integer location = uniformLocations.get(var);
+        glUniform1i(location, val ? 1 : 0);
+    }
+
+    public void uploadMat4(String var, Matrix4f val) {
+        Integer location = uniformLocations.get(var);
+
+        FloatBuffer buffer = MemoryUtil.memAllocFloat(16);
+        val.get(buffer);
+
+        glUniformMatrix4fv(location, false, buffer);
+    }
+
+    public void uploadMat3(String var, Matrix3f val) {
+        Integer location = uniformLocations.get(var);
+
+        FloatBuffer buffer = MemoryUtil.memAllocFloat(9);
+        val.get(buffer);
+
+        glUniformMatrix3fv(location, false, buffer);
     }
 }
