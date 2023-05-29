@@ -1,5 +1,8 @@
 package com.ccat.core.challenge;
 
+import com.ccat.core.WindowManager;
+import com.ccat.core.listener.KeyListener;
+import com.ccat.core.model.UniformType;
 import com.ccat.core.renderer.ShaderProgram;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -8,6 +11,7 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -17,6 +21,7 @@ import static org.lwjgl.opengl.GL45.*;
 public class ShadersChallenge extends SimpleChallenge{
     private final ShaderProgram shaderProgram;
     private final int FLOAT_SIZE = Float.BYTES;
+    private Vector3f squarePos = new Vector3f(0.5f, 0.5f, 0f);
 
     private int vao;
     private int vbo;
@@ -33,9 +38,14 @@ public class ShadersChallenge extends SimpleChallenge{
             2, 0, 3
     };
 
-    public ShadersChallenge(ShaderProgram shaderProgram, int windowWidth, int windowHeight) {
-        this.shaderProgram = shaderProgram;
-        initializeProjection(windowWidth, windowHeight);
+    public ShadersChallenge(WindowManager window) {
+        //Initialize Shader
+        final String vertexShaderFilepath = "shaders/vertex/vertex_shader_base.glsl";
+        final String fragmentShaderFilepath = "shaders/fragment/fragment_shader_base.glsl";
+        this.shaderProgram = new ShaderProgram(vertexShaderFilepath, fragmentShaderFilepath);
+        shaderProgram.bind();
+
+        initializeProjection(window.getWidth(), window.getHeight());
         initializeCamera();
     }
 
@@ -54,24 +64,25 @@ public class ShadersChallenge extends SimpleChallenge{
         Matrix4f projection = new Matrix4f();
         projection.perspective(fov, aspect, zNear, zFar);
 
-        shaderProgram.uploadMat4("uProjection", projection);
+        shaderProgram.uploadMat4(UniformType.PROJECTION.getName(), projection);
     }
 
     /**
      * Uploads the View Matrix to the Vertex Shader
+     * (can be used in update())
      */
     private void initializeCamera() {
-        Vector3f cameraPos = new Vector3f(0f, -5f, 10f);
+        Vector3f cameraPos = new Vector3f(0f, 0f, 10f);
         Vector3f cameraLookAt = new Vector3f(0f, 0f, 0f);
         Vector3f up = new Vector3f(0f, 1f, 0f);
 
         Matrix4f view = new Matrix4f().lookAt(cameraPos, cameraLookAt, up);
 
-        shaderProgram.uploadMat4("uView", view);
+        shaderProgram.uploadMat4(UniformType.VIEW.getName(), view);
     }
 
 
-    private void initChallenge1() {
+    public void initializeSquare() {
         int vertexBindingPoint = 0;
         int positionSize = 3;
 
@@ -104,16 +115,19 @@ public class ShadersChallenge extends SimpleChallenge{
         glEnableVertexArrayAttrib(vao, positionAttribSlot);
     }
 
-    private void drawChallenge1(Vector3f position) {
+    public void update(float delta) {
+        shaderProgram.bind();
+
+        moveSquare(delta);
+
         float rotation = 0.0f;
-
         Matrix4f transform = new Matrix4f()
-                .scale(1.0f)
+                .scale(1f)
                 .rotate(rotation, 0f, 0f, 1f)
-                .translate(position);
+                .translate(squarePos);
+        shaderProgram.uploadMat4(UniformType.TRANSFORM.getName(), transform);
 
-        shaderProgram.uploadMat4("uTransform", transform);
-
+        glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES,
                 squareElementArray.length,
                 GL_UNSIGNED_INT,
@@ -121,32 +135,43 @@ public class ShadersChallenge extends SimpleChallenge{
         );
     }
 
-    @Override
-    public void drawCurrentChallenge(Vector3f position) {
-        glBindVertexArray(vao);
+    private void moveSquare(float delta) {
+        float moveSpeed = 10f;
 
-        switch (challengeIndex) {
-            case 1 -> drawChallenge1(position);
+        if(KeyListener.isKeyPressed(GLFW_KEY_W)) {
+            squarePos.y += delta * moveSpeed;
+        }
+        else if(KeyListener.isKeyPressed(GLFW_KEY_S)) {
+            squarePos.y -= delta * moveSpeed;
+        }
+        if(KeyListener.isKeyPressed(GLFW_KEY_D)) {
+            squarePos.x += delta * moveSpeed;
+        }
+        if(KeyListener.isKeyPressed(GLFW_KEY_A)) {
+            squarePos.x -= delta * moveSpeed;
         }
     }
+
+    @Override
+    public void drawCurrentChallenge(Vector3f position) { }
 
     @Override
     public void drawCurrentChallenge() { }
 
     @Override
-    void disposeCurrentChallenge() {
+    public void disposeCurrentChallenge() {
         glDeleteVertexArrays(vao);
         glDeleteBuffers(vbo);
         glDeleteBuffers(ebo);
 
         glDisableVertexAttribArray(0);
         glBindVertexArray(0);
+
+        shaderProgram.unbind();
+        shaderProgram.destroy();
+
     }
 
     @Override
-    void initNewChallenge() {
-        switch (challengeIndex) {
-            case 1 -> initChallenge1();
-        }
-    }
+    void initNewChallenge() { }
 }
