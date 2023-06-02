@@ -18,33 +18,21 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.opengl.GL45.*;
 
-public class ShadersChallenge extends SimpleChallenge{
+public class MovingSquareChallenge extends SimpleChallenge{
     private final ShaderProgram shaderProgram;
-    private final int FLOAT_SIZE = Float.BYTES;
     private Vector3f squarePos = new Vector3f(0.5f, 0.5f, 0f);
 
     private int vao;
     private int vbo;
     private int ebo;
 
-    private final float[] squareVertexArray = new float[] {
-            -0.5f,  0.5f, 0f, //Top Left        | 0
-             0.5f,  0.5f, 0f, //Top Right       | 1
-             0.5f, -0.5f, 0f, //Bottom Right    | 2
-            -0.5f, -0.5f, 0f, //Bottom Left     | 3
-    };
-    private final int[] squareElementArray = new int[] {
-            2, 1, 0,
-            2, 0, 3
-    };
-
-    public ShadersChallenge(WindowManager window) {
+    public MovingSquareChallenge(WindowManager window) {
         //Initialize Shader
         final String vertexShaderFilepath = "shaders/vertex/vertex_shader_base.glsl";
         final String fragmentShaderFilepath = "shaders/fragment/fragment_shader_base.glsl";
         this.shaderProgram = new ShaderProgram(vertexShaderFilepath, fragmentShaderFilepath);
-        shaderProgram.bind();
 
+        shaderProgram.bind();
         initializeProjection(window.getWidth(), window.getHeight());
         initializeCamera();
     }
@@ -82,7 +70,7 @@ public class ShadersChallenge extends SimpleChallenge{
     }
 
 
-    public void initializeSquare() {
+    public void initializeQuad() {
         int vertexBindingPoint = 0;
         int positionSize = 3;
 
@@ -118,12 +106,12 @@ public class ShadersChallenge extends SimpleChallenge{
     public void update(float delta) {
         shaderProgram.bind();
 
-        moveSquare(delta);
+        moveQuad(delta);
 
         float rotation = 0.0f;
         Matrix4f transform = new Matrix4f()
                 .scale(1f)
-                .rotate(rotation, 0f, 0f, 1f)
+                .rotate(rotation, 0f, 0f, 0f)
                 .translate(squarePos);
         shaderProgram.uploadMat4(UniformType.TRANSFORM.getName(), transform);
 
@@ -135,7 +123,7 @@ public class ShadersChallenge extends SimpleChallenge{
         );
     }
 
-    private void moveSquare(float delta) {
+    private void moveQuad(float delta) {
         float moveSpeed = 10f;
 
         if(KeyListener.isKeyPressed(GLFW_KEY_W)) {
@@ -151,9 +139,6 @@ public class ShadersChallenge extends SimpleChallenge{
             squarePos.x -= delta * moveSpeed;
         }
     }
-
-    @Override
-    public void drawCurrentChallenge(Vector3f position) { }
 
     @Override
     public void drawCurrentChallenge() { }

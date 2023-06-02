@@ -1,7 +1,7 @@
 package com.ccat;
 
 import com.ccat.core.WindowManager;
-import com.ccat.core.challenge.ShadersChallenge;
+import com.ccat.core.challenge.ShaderChallenge;
 import com.ccat.core.listener.KeyListener;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -41,8 +41,12 @@ public class Main {
         float frameStart = 0f;
         float keyDebounce = 0f;
 
-        ShadersChallenge challenge = new ShadersChallenge(window);
-        challenge.initializeSquare();
+//        MovingSquareChallenge challenge = new MovingSquareChallenge(window);
+//        challenge.initializeQuad();
+
+        ShaderChallenge shaderChallenge = new ShaderChallenge(window);
+        shaderChallenge.initNewChallenge();
+
 
         while(!glfwWindowShouldClose(window.getWindow())) {
             delta = (float) glfwGetTime() - frameStart;
@@ -52,14 +56,17 @@ public class Main {
             glClearColor(0.3f, 0.4f, 0.5f, 1);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            challenge.update(delta);
+//            challenge.update(delta);
+            shaderChallenge.drawCurrentChallenge();
+
             input(keyDebounce);
 
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();
         }
 
-        challenge.disposeCurrentChallenge();
+//        challenge.disposeCurrentChallenge();
+        shaderChallenge.disposeCurrentChallenge();
     }
 
     /** Perform clean-up */

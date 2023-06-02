@@ -2,24 +2,15 @@ package com.ccat.core.challenge;
 
 import com.ccat.core.renderer.ShaderProgram;
 import com.ccat.core.util.ShapeUtil;
-import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_LINES;
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
-import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL11.glDrawElements;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL45.*;
 
 public class BuffersChallenge extends SimpleChallenge{
@@ -53,7 +44,7 @@ public class BuffersChallenge extends SimpleChallenge{
 
         int positionSize = 3;
         int colorSize = 4;
-        int vertexSizeBytes = (colorSize + positionSize) * floatSize;
+        int vertexSizeBytes = (colorSize + positionSize) * FLOAT_SIZE;
 
 
         int colAttrib = glGetAttribLocation(shaderProgram.getProgram(), "aColor");
@@ -75,7 +66,7 @@ public class BuffersChallenge extends SimpleChallenge{
                 GL_FLOAT,
                 false,
                 vertexSizeBytes,
-                colorSize * floatSize
+                colorSize * FLOAT_SIZE
         );
     }
     private void drawChallenge1() {
@@ -122,12 +113,12 @@ public class BuffersChallenge extends SimpleChallenge{
 
             int positionSize = 3;
             int colorSize = 4;
-            int vertexSize = (colorSize + positionSize) * floatSize;
+            int vertexSize = (colorSize + positionSize) * FLOAT_SIZE;
 
             glVertexAttribPointer(0, colorSize, GL_FLOAT, false, vertexSize,0);
             glEnableVertexAttribArray(0);
 
-            glVertexAttribPointer(1, positionSize, GL_FLOAT, false, vertexSize, colorSize * floatSize);
+            glVertexAttribPointer(1, positionSize, GL_FLOAT, false, vertexSize, colorSize * FLOAT_SIZE);
             glEnableVertexAttribArray(1);
         }
     }
@@ -180,11 +171,11 @@ public class BuffersChallenge extends SimpleChallenge{
 
             int positionSize = 3;
             int colorSize = 4;
-            int vertexSize = (positionSize + colorSize) * floatSize;
+            int vertexSize = (positionSize + colorSize) * FLOAT_SIZE;
 
             glVertexAttribPointer(0, colorSize, GL_FLOAT,false, vertexSize, 0);
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, positionSize, GL_FLOAT,false,vertexSize, colorSize * floatSize);
+            glVertexAttribPointer(1, positionSize, GL_FLOAT,false,vertexSize, colorSize * FLOAT_SIZE);
             glEnableVertexAttribArray(1);
         }
     }
@@ -237,11 +228,11 @@ public class BuffersChallenge extends SimpleChallenge{
 
             int positionSize = 3;
             int colorSize = 4;
-            int vertexSize = (positionSize + colorSize) * floatSize;
+            int vertexSize = (positionSize + colorSize) * FLOAT_SIZE;
 
             glVertexAttribPointer(0, colorSize, GL_FLOAT,false,colorSize,0);
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, positionSize, GL_FLOAT,false,vertexSize,colorSize * floatSize);
+            glVertexAttribPointer(1, positionSize, GL_FLOAT,false,vertexSize,colorSize * FLOAT_SIZE);
             glEnableVertexAttribArray(1);
         }
     }
@@ -271,7 +262,7 @@ public class BuffersChallenge extends SimpleChallenge{
 
         int positionSize = 3;
         int colorSize = 4;
-        int vertexSize = (positionSize + colorSize) * floatSize;
+        int vertexSize = (positionSize + colorSize) * FLOAT_SIZE;
         int vertexBindingPoint = 0;
 
         this.vao5 = glCreateVertexArrays();
@@ -302,7 +293,7 @@ public class BuffersChallenge extends SimpleChallenge{
         glEnableVertexArrayAttrib(vao5, colorAttribSlot);
 
         int positionAttribSlot = 1;
-        glVertexArrayAttribFormat(vao5, positionAttribSlot, positionSize, GL_FLOAT,false,colorSize * floatSize);
+        glVertexArrayAttribFormat(vao5, positionAttribSlot, positionSize, GL_FLOAT,false,colorSize * FLOAT_SIZE);
         glVertexArrayAttribBinding(vao5, positionAttribSlot, vertexBindingPoint);
         glEnableVertexArrayAttrib(vao5, positionAttribSlot);
     }
@@ -348,9 +339,6 @@ public class BuffersChallenge extends SimpleChallenge{
             default -> {}
         }
     }
-
-    @Override
-    public void drawCurrentChallenge(Vector3f position) { }
 
     @Override
     protected void initNewChallenge() {
