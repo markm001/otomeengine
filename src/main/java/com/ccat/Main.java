@@ -2,6 +2,7 @@ package com.ccat;
 
 import com.ccat.core.WindowManager;
 import com.ccat.core.challenge.ShaderChallenge;
+import com.ccat.core.challenge.TerrainChallenge;
 import com.ccat.core.listener.KeyListener;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -29,6 +30,7 @@ public class Main {
 
         //Initialize Window
         window = WindowManager.getInstance(WIDTH, HEIGHT, TITLE);
+        glEnable(GL_DEPTH_TEST);
 
         loop();
 
@@ -44,9 +46,11 @@ public class Main {
 //        MovingSquareChallenge challenge = new MovingSquareChallenge(window);
 //        challenge.initializeQuad();
 
-        ShaderChallenge shaderChallenge = new ShaderChallenge(window);
-        shaderChallenge.initNewChallenge();
+//        ShaderChallenge shaderChallenge = new ShaderChallenge(window);
+//        shaderChallenge.initNewChallenge();
 
+        TerrainChallenge terrainChallenge = new TerrainChallenge(window);
+        terrainChallenge.initNewChallenge();
 
         while(!glfwWindowShouldClose(window.getWindow())) {
             delta = (float) glfwGetTime() - frameStart;
@@ -54,10 +58,11 @@ public class Main {
             keyDebounce -= delta;
 
             glClearColor(0.3f, 0.4f, 0.5f, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 //            challenge.update(delta);
-            shaderChallenge.drawCurrentChallenge();
+//            shaderChallenge.drawCurrentChallenge();
+            terrainChallenge.update(delta);
 
             input(keyDebounce);
 
@@ -66,7 +71,8 @@ public class Main {
         }
 
 //        challenge.disposeCurrentChallenge();
-        shaderChallenge.disposeCurrentChallenge();
+//        shaderChallenge.disposeCurrentChallenge();
+        terrainChallenge.disposeCurrentChallenge();
     }
 
     /** Perform clean-up */
