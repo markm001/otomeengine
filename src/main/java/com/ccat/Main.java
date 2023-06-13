@@ -1,8 +1,7 @@
 package com.ccat;
 
 import com.ccat.core.WindowManager;
-import com.ccat.core.challenge.ShaderChallenge;
-import com.ccat.core.challenge.TerrainChallenge;
+import com.ccat.core.challenge.TexturesChallenge;
 import com.ccat.core.listener.KeyListener;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -49,8 +48,11 @@ public class Main {
 //        ShaderChallenge shaderChallenge = new ShaderChallenge(window);
 //        shaderChallenge.initNewChallenge();
 
-        TerrainChallenge terrainChallenge = new TerrainChallenge(window);
-        terrainChallenge.initNewChallenge();
+//        TerrainChallenge terrainChallenge = new TerrainChallenge(window);
+//        terrainChallenge.initNewChallenge();
+
+        TexturesChallenge texturesChallenge = new TexturesChallenge(window);
+        texturesChallenge.initNewChallenge();
 
         while(!glfwWindowShouldClose(window.getWindow())) {
             delta = (float) glfwGetTime() - frameStart;
@@ -62,7 +64,8 @@ public class Main {
 
 //            challenge.update(delta);
 //            shaderChallenge.drawCurrentChallenge();
-            terrainChallenge.update(delta);
+//            terrainChallenge.update(delta);
+            texturesChallenge.drawCurrentChallenge();
 
             input(keyDebounce);
 
@@ -72,7 +75,8 @@ public class Main {
 
 //        challenge.disposeCurrentChallenge();
 //        shaderChallenge.disposeCurrentChallenge();
-        terrainChallenge.disposeCurrentChallenge();
+//        terrainChallenge.disposeCurrentChallenge();
+        texturesChallenge.disposeCurrentChallenge();
     }
 
     /** Perform clean-up */

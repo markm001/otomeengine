@@ -23,16 +23,19 @@ import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.opengl.GL45.glEnableVertexArrayAttrib;
 
 public class TerrainChallenge extends SimpleChallenge {
-    private final int size = 12;
+    private final int SIZE = 12;
     private int subdivisions = 10;
     private float[] vertexArray;
     private int[] elementArray;
 
+    private float debounce = 0f;
+    private float camY = 10.0f;
+
     private void createGrid() {
-        float offset = (size / 2f);
+        float offset = (SIZE / 2f);
 
         LinkedList<Float> floats = new LinkedList<>();
-        float interval = (float) size / subdivisions;
+        float interval = (float) SIZE / subdivisions;
         for (int y = 0; y <= subdivisions; y++) {
             for (int x = 0; x <= subdivisions; x++) {
                 float xPos = x * interval - offset;
@@ -109,24 +112,27 @@ public class TerrainChallenge extends SimpleChallenge {
     /**
      * Uploads the View Matrix to the Vertex Shader
      */
+    private void initializeCamera() {
+        float radius = 10.0f;
+        float camX = (float) (Math.sin(glfwGetTime()) * radius);
+        float camZ = (float) (Math.cos(glfwGetTime()) * radius);
 
-    float rotation = 0f;
-    float debounce = 0f;
-    private void initializeCamera(float delta) {
-        debounce -= delta;
-
-        float maxRadius = (size / 2f)* 2f;
-//        Vector3f cameraPos = new Vector3f(0f, -8f, 10f);
-        rotation += delta * 30.0f;
-        double radians = Math.toRadians(rotation);
-
-        Vector3f cameraPos = new Vector3f((float) (maxRadius*Math.sin(radians)), 10f, (float) (maxRadius*Math.cos(radians)));
-        Vector3f cameraLookAt = new Vector3f(0.0f, 0.0f, 2.0f);
+        Vector3f cameraPos = new Vector3f(camX, camY, camZ);
+        Vector3f cameraLookAt = new Vector3f(0.0f, 0.0f, 0.0f);
         Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
 
         Matrix4f view = new Matrix4f().lookAt(cameraPos, cameraLookAt, up);
 
         shaderProgram.uploadMat4(UniformType.VIEW.getName(), view);
+
+        if(KeyListener.isKeyPressed(GLFW_KEY_UP) && debounce < 0) {
+            camY--;
+            debounce = 0.2f;
+        }
+        if(KeyListener.isKeyPressed(GLFW_KEY_DOWN) && debounce < 0) {
+            camY++;
+            debounce = 0.2f;
+        }
     }
 
     private void initializeQuad() {
@@ -167,10 +173,12 @@ public class TerrainChallenge extends SimpleChallenge {
     public void update(float delta) {
         shaderProgram.bind();
 
-        initializeCamera(delta);
+        initializeCamera();
         shaderProgram.uploadFloat("uTime", (float) glfwGetTime());
 
-        if(KeyListener.isKeyPressed(GLFW_KEY_RIGHT) && debounce < 0) {
+        debounce -= delta;
+
+        if(KeyListener.isKeyPressed(GLFW_KEY_RIGHT) && debounce < 0 && subdivisions > 1) {
             subdivisions--;
             clearQuad();
             initializeQuad();
@@ -196,9 +204,7 @@ public class TerrainChallenge extends SimpleChallenge {
     }
 
     @Override
-    public void drawCurrentChallenge() {
-
-    }
+    public void drawCurrentChallenge() { }
 
     @Override
     public void disposeCurrentChallenge() {
