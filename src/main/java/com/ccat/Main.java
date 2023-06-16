@@ -1,7 +1,7 @@
 package com.ccat;
 
 import com.ccat.core.WindowManager;
-import com.ccat.core.challenge.TexturesChallenge;
+import com.ccat.core.challenge.TexturedPlane;
 import com.ccat.core.listener.KeyListener;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -51,8 +51,11 @@ public class Main {
 //        TerrainChallenge terrainChallenge = new TerrainChallenge(window);
 //        terrainChallenge.initNewChallenge();
 
-        TexturesChallenge texturesChallenge = new TexturesChallenge(window);
-        texturesChallenge.initNewChallenge();
+//        TexturesChallenge texturesChallenge = new TexturesChallenge(window);
+//        texturesChallenge.initNewChallenge();
+
+        TexturedPlane texturedPlane = new TexturedPlane(window);
+        texturedPlane.initNewChallenge();
 
         while(!glfwWindowShouldClose(window.getWindow())) {
             delta = (float) glfwGetTime() - frameStart;
@@ -65,7 +68,8 @@ public class Main {
 //            challenge.update(delta);
 //            shaderChallenge.drawCurrentChallenge();
 //            terrainChallenge.update(delta);
-            texturesChallenge.drawCurrentChallenge();
+//            texturesChallenge.drawCurrentChallenge();
+            texturedPlane.drawCurrentChallenge();
 
             input(keyDebounce);
 
@@ -76,7 +80,8 @@ public class Main {
 //        challenge.disposeCurrentChallenge();
 //        shaderChallenge.disposeCurrentChallenge();
 //        terrainChallenge.disposeCurrentChallenge();
-        texturesChallenge.disposeCurrentChallenge();
+//        texturesChallenge.disposeCurrentChallenge();
+        texturedPlane.disposeCurrentChallenge();
     }
 
     /** Perform clean-up */
