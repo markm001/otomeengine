@@ -10,8 +10,11 @@ import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
@@ -33,16 +36,21 @@ public class TexturedPlane extends SimpleChallenge {
             1, 2, 0
     };
 
+    private final List<String> paths = List.of(
+            "textures/test_texture_02.jpg",
+            "textures/awesomeface.png"
+    );
+
     private final ShaderProgram shaderProgram;
 
-    private TextureLoader texture;
+    private TextureLoader[] textures;
     private int vao;
     private int vbo;
     private int ebo;
 
     public TexturedPlane(WindowManager window) {
         final String vertexShaderFilepath = "shaders/vertex/vertex_shader_texture.glsl";
-        final String fragmentShaderFilepath = "shaders/fragment/texture_fragment_shader.glsl";
+        final String fragmentShaderFilepath = "shaders/fragment/combined_texture_fragment_shader.glsl";
         this.shaderProgram = new ShaderProgram(vertexShaderFilepath, fragmentShaderFilepath);
 
         shaderProgram.bind();
@@ -99,15 +107,31 @@ public class TexturedPlane extends SimpleChallenge {
 
 
         //Texture
-//        String filepath = "textures/test_texture_04.jpg";
-        String filepath = "textures/test_texture_03.png";
-//        String filepath = "textures/test_texture_02.jpg";
-//        String filepath = "textures/Test_Texture_01.png";
-        try {
-            this.texture = new TextureLoader(FileReaderUtil.readImage(filepath), GL_RGB, GL_LINEAR);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to load Texture image from path:" + filepath);
+        this.textures = createTextures(paths);
+    }
+
+    /**
+     * @param paths filepaths to texture
+     * @return TextureLoader Objects from designated paths
+     */
+    private TextureLoader[] createTextures(List<String> paths) {
+        final TextureLoader[] textures = new TextureLoader[paths.size()];
+
+        for (int i = 0; i < paths.size(); i++) {
+            String file = paths.get(i);
+            int type = file.contains("png") ? GL_RGBA : GL_RGB;
+
+            System.out.println(file + " : " + type);
+            try {
+                ByteBuffer bufferedImg = FileReaderUtil.readImage(file);
+
+                textures[i] = new TextureLoader(bufferedImg, type, GL_LINEAR);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to load Texture image from path.");
+            }
         }
+
+        return textures;
     }
 
     @Override
@@ -128,8 +152,17 @@ public class TexturedPlane extends SimpleChallenge {
         shaderProgram.uploadMat4(UniformType.VIEW.getName(), view);
 
         //Texture
-        int textureSlot = 0;
-        texture.bind(textureSlot);
+        for (int index = 0; index < textures.length; index++) {
+            textures[index].bind(index);
+
+            //Set the Uniform
+            String uniform = UniformType.TEXTURE.getName() + (index + 1);
+            shaderProgram.uploadInt(uniform, index);
+        }
+
+        //Set uniforms
+//        glUniform1i(glGetUniformLocation(shaderProgram.getProgram(), "uTexture1"), 0);
+          //or : shaderProgram.uploadInt("uTexture2", 1);
 
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES,
@@ -149,8 +182,11 @@ public class TexturedPlane extends SimpleChallenge {
         glBindVertexArray(0);
 
         shaderProgram.unbind();
-        texture.unbind();
         shaderProgram.destroy();
-        texture.destroy();
+
+        Arrays.stream(textures).forEach(texture -> {
+            texture.unbind();
+            texture.destroy();
+        });
     }
 }

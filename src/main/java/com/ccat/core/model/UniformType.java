@@ -3,7 +3,8 @@ package com.ccat.core.model;
 public enum UniformType {
     VIEW("uView"),
     PROJECTION("uProjection"),
-    TRANSFORM("uTransform");
+    TRANSFORM("uTransform"),
+    TEXTURE("uTexture");
 
     private final String name;
 

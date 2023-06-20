@@ -2,6 +2,7 @@ package com.ccat;
 
 import com.ccat.core.WindowManager;
 import com.ccat.core.challenge.TexturedCubes;
+import com.ccat.core.challenge.TexturedPlane;
 import com.ccat.core.listener.KeyListener;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -30,6 +31,9 @@ public class Main {
         //Initialize Window
         window = WindowManager.getInstance(WIDTH, HEIGHT, TITLE);
         glEnable(GL_DEPTH_TEST);
+        //Enable Transparency for Textures
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         loop();
 
@@ -51,10 +55,10 @@ public class Main {
 //        TerrainChallenge terrainChallenge = new TerrainChallenge(window);
 //        terrainChallenge.initNewChallenge();
 
-//        TexturedPlane texturedPlane = new TexturedPlane(window);
-//        texturedPlane.initNewChallenge();
+        TexturedPlane texturedPlane = new TexturedPlane(window);
+        texturedPlane.initNewChallenge();
 
-        TexturedCubes texturedCubes = new TexturedCubes(window, 6);
+        TexturedCubes texturedCubes = new TexturedCubes(window, 1);
 
         while(!glfwWindowShouldClose(window.getWindow())) {
             delta = (float) glfwGetTime() - frameStart;
@@ -67,7 +71,7 @@ public class Main {
 //            challenge.update(delta);
 //            shaderChallenge.drawCurrentChallenge();
 //            terrainChallenge.update(delta);
-//            texturedPlane.drawCurrentChallenge();
+            texturedPlane.drawCurrentChallenge();
             texturedCubes.drawCubes();
 
             input(keyDebounce);
@@ -79,7 +83,7 @@ public class Main {
 //        challenge.disposeCurrentChallenge();
 //        shaderChallenge.disposeCurrentChallenge();
 //        terrainChallenge.disposeCurrentChallenge();
-//        texturedPlane.disposeCurrentChallenge();
+        texturedPlane.disposeCurrentChallenge();
         texturedCubes.disposeCubes();
     }
 
