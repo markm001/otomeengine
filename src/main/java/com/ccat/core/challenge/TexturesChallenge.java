@@ -1,5 +1,6 @@
 package com.ccat.core.challenge;
 
+import com.ccat.core.CameraController;
 import com.ccat.core.WindowManager;
 import com.ccat.core.model.UniformType;
 import com.ccat.core.renderer.ShaderProgram;
@@ -89,13 +90,15 @@ public class TexturesChallenge extends SimpleChallenge {
     }
 
     private final TextureLoader texture;
+    private final CameraController camera;
     private int vao;
     private int vbo;
     private int ebo;
 
-    public TexturesChallenge(WindowManager window, TextureLoader texture) {
+    public TexturesChallenge(WindowManager window, CameraController camera, TextureLoader texture) {
         generateCube();
 
+        this.camera = camera;
         this.texture = texture;
 
         final String vertexShaderFilepath = "shaders/vertex/vertex_shader_texture.glsl";
@@ -107,15 +110,15 @@ public class TexturesChallenge extends SimpleChallenge {
     }
 
     private void initializeProjection(int windowWidth, int windowHeight) {
-        float fov = 45f;
-        float zNear = 0.01f;
-        float zFar = 10000f;
-        float aspect = (float) windowWidth / (float) windowHeight;
+//        float fov = 45f;
+//        float zNear = 0.01f;
+//        float zFar = 10000f;
+//        float aspect = (float) windowWidth / (float) windowHeight;
+//
+//        Matrix4f projection = new Matrix4f();
+//        projection.perspective(fov, aspect, zNear, zFar);
 
-        Matrix4f projection = new Matrix4f();
-        projection.perspective(fov, aspect, zNear, zFar);
-
-        shaderProgram.uploadMat4(UniformType.PROJECTION.getName(), projection);
+        shaderProgram.uploadMat4(UniformType.PROJECTION.getName(), camera.getProjection());
     }
 
     private void initializeCube() {
@@ -185,12 +188,12 @@ public class TexturesChallenge extends SimpleChallenge {
         float camX = (float) (Math.sin(glfwGetTime()) * radius);
         float camZ = (float) (Math.cos(glfwGetTime()) * radius);
 
-        Vector3f cameraPos = new Vector3f(camX, 4f, camZ);
-        Vector3f cameraLookAt = new Vector3f(0.0f, 0.0f, 0.0f);
-        Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
-
-        Matrix4f view = new Matrix4f().lookAt(cameraPos, cameraLookAt, up);
-
+//        Vector3f cameraPos = new Vector3f(camX, 4f, camZ);
+//        Vector3f cameraLookAt = new Vector3f(0.0f, 0.0f, 0.0f);
+//        Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
+//
+//        Matrix4f view = new Matrix4f().lookAt(cameraPos, cameraLookAt, up);
+        Matrix4f view = camera.updateCameraPos(new Vector3f(camX, 4f, camZ));
         shaderProgram.uploadMat4(UniformType.VIEW.getName(), view);
 
 

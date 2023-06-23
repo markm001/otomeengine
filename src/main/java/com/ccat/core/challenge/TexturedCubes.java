@@ -1,5 +1,6 @@
 package com.ccat.core.challenge;
 
+import com.ccat.core.CameraController;
 import com.ccat.core.WindowManager;
 import com.ccat.core.renderer.TextureLoader;
 import com.ccat.core.util.FileReaderUtil;
@@ -37,6 +38,7 @@ public class TexturedCubes {
 
         float offset = (float)amount / 2;
         Random r = new Random();
+        CameraController camera = new CameraController(new Vector3f(0f, 0f, 4f), window.getWidth(), window.getHeight());
 
         for (int z = 0; z < amount; z++) {
             for (int x = 0; x < amount; x++) {
@@ -44,7 +46,7 @@ public class TexturedCubes {
                 Vector3f position = new Vector3f((float)x-offset, 0f, (float)z-offset);
                 //10cubes
                 int randomNum = r.nextInt(0, textures.size());
-                TexturesChallenge cube = new TexturesChallenge(window, textures.get(randomNum));
+                TexturesChallenge cube = new TexturesChallenge(window, camera, textures.get(randomNum));
                 cubes.put(cube, position);
                 cube.initNewChallenge();
             }

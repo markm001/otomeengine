@@ -58,7 +58,7 @@ public class Main {
         TexturedPlane texturedPlane = new TexturedPlane(window);
         texturedPlane.initNewChallenge();
 
-        TexturedCubes texturedCubes = new TexturedCubes(window, 1);
+        TexturedCubes texturedCubes = new TexturedCubes(window, 6);
 
         while(!glfwWindowShouldClose(window.getWindow())) {
             delta = (float) glfwGetTime() - frameStart;
